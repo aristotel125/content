@@ -20,13 +20,11 @@
       --shadow:0 10px 30px rgba(0,0,0,.35);
       --grad:linear-gradient(135deg,var(--primary),var(--accent));
     }
-    *{box-sizing:border-box}
+    *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
     html,body{
       margin:0;
       padding:0;
-      background:radial-gradient(1200px 600px at 80% -10%,rgba(106,167,255,.15),transparent),
-                 radial-gradient(900px 500px at -10% 10%,rgba(194,155,255,.12),transparent),
-                 var(--bg);
+      background:var(--bg);
       color:var(--text);
       font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial,sans-serif;
       min-height:100vh;
@@ -51,7 +49,7 @@
       margin:0;
     }
     .card{
-      background:linear-gradient(180deg,rgba(255,255,255,.02),rgba(255,255,255,.00));
+      background:var(--card);
       border:1px solid var(--border);
       border-radius:var(--radius);
       box-shadow:var(--shadow);
@@ -73,14 +71,13 @@
       border:1px solid var(--border);
       border-radius:12px;
       color:var(--text);
-      font-size:15px;
+      font-size:16px;
       font-family:inherit;
-      transition:all .2s;
+      transition:border-color .15s;
     }
     .form-input:focus{
       outline:none;
       border-color:var(--primary);
-      background:rgba(106,167,255,.05);
     }
     .form-input::placeholder{
       color:var(--muted);
@@ -99,17 +96,17 @@
       font-weight:600;
       font-size:15px;
       cursor:pointer;
-      transition:all .2s;
       display:flex;
       flex-direction:column;
       align-items:center;
       justify-content:center;
       gap:8px;
       min-height:90px;
+      touch-action:manipulation;
+      user-select:none;
     }
-    .type-btn:hover{
-      background:rgba(255,255,255,.06);
-      transform:translateY(-2px);
+    .type-btn:active{
+      opacity:.7;
     }
     .type-btn.active{
       background:var(--grad);
@@ -136,16 +133,16 @@
       font-weight:600;
       font-size:14px;
       cursor:pointer;
-      transition:all .2s;
       display:flex;
       align-items:center;
       justify-content:flex-start;
       gap:10px;
       min-height:50px;
+      touch-action:manipulation;
+      user-select:none;
     }
-    .platform-btn:hover{
-      background:rgba(255,255,255,.06);
-      transform:translateY(-2px);
+    .platform-btn:active{
+      opacity:.7;
     }
     .platform-btn.active{
       background:var(--grad);
@@ -166,17 +163,16 @@
       font-weight:800;
       font-size:16px;
       cursor:pointer;
-      transition:all .2s;
       margin-top:12px;
+      touch-action:manipulation;
+      user-select:none;
     }
-    .submit-btn:hover{
-      transform:translateY(-2px);
-      box-shadow:0 8px 20px rgba(106,167,255,.4);
+    .submit-btn:active{
+      opacity:.8;
     }
     .submit-btn:disabled{
       opacity:.5;
       cursor:not-allowed;
-      transform:none;
     }
     .modal{
       display:none;
@@ -186,7 +182,6 @@
       width:100%;
       height:100%;
       background:rgba(0,0,0,.7);
-      backdrop-filter:blur(8px);
       z-index:1000;
       align-items:center;
       justify-content:center;
@@ -243,7 +238,7 @@
       font-weight:700;
       font-size:15px;
       cursor:pointer;
-      transition:all .2s;
+      touch-action:manipulation;
     }
     .modal-btn.confirm{
       background:var(--grad);
@@ -254,8 +249,8 @@
       color:var(--text);
       border:1px solid var(--border);
     }
-    .modal-btn:hover{
-      transform:translateY(-2px);
+    .modal-btn:active{
+      opacity:.7;
     }
     .success-message{
       background:rgba(40,194,129,.1);
@@ -270,17 +265,6 @@
     }
     .success-message.show{
       display:block;
-      animation:slideIn .3s ease;
-    }
-    @keyframes slideIn{
-      from{
-        opacity:0;
-        transform:translateY(-10px);
-      }
-      to{
-        opacity:1;
-        transform:translateY(0);
-      }
     }
     .error-message{
       background:rgba(255,107,107,.1);
@@ -295,7 +279,6 @@
     }
     .error-message.show{
       display:block;
-      animation:slideIn .3s ease;
     }
     .checkbox-wrapper{
       display:flex;
@@ -312,6 +295,7 @@
       font-size:14px;
       color:var(--muted);
       cursor:pointer;
+      user-select:none;
     }
     #deadlineGroup{
       display:none;
