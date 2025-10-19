@@ -229,6 +229,7 @@
     .confirmation-value{
       color:var(--text);
       font-weight:500;
+      word-break:break-word;
     }
     .modal-actions{
       display:flex;
@@ -296,11 +297,6 @@
       display:block;
       animation:slideIn .3s ease;
     }
-    .helper-text{
-      font-size:13px;
-      color:var(--muted);
-      margin-top:8px;
-    }
     .checkbox-wrapper{
       display:flex;
       align-items:center;
@@ -350,15 +346,15 @@
         <div class="form-group">
           <label class="form-label">📋 Тип контента</label>
           <div class="content-type-buttons">
-            <button type="button" class="type-btn" data-type="post">
+            <button type="button" class="type-btn" data-type="Пост">
               <span class="icon">📝</span>
               <span class="label">Пост</span>
             </button>
-            <button type="button" class="type-btn" data-type="video">
+            <button type="button" class="type-btn" data-type="Ролик">
               <span class="icon">🎬</span>
               <span class="label">Ролик</span>
             </button>
-            <button type="button" class="type-btn" data-type="carousel">
+            <button type="button" class="type-btn" data-type="Карусель">
               <span class="icon">🎠</span>
               <span class="label">Карусель</span>
             </button>
@@ -422,24 +418,24 @@
 
   <script>
     // URL Google Apps Script
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxka-rn9iqflw2p0I5yvwlYxieKj5CXas_ZQ1ZpOe1dpIE0Fm0epOu_YkVdG2hD32fhog/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxr749U3VyolTQVFoK57dsXoTcsc00PUal1s238lM905fGeV8KepWvI1QjlwxMreWdVjw/exec';
     
     // Конфигурация платформ для разных типов контента
     const PLATFORMS = {
-      post: [
+      'Пост': [
         { id: 'vk-personal', name: 'ВК - личный акк', icon: '👤' },
         { id: 'vk-group', name: 'ВК - пост группа', icon: '👥' },
         { id: 'ok-feed', name: 'ОК - пост в ленту', icon: '🟠' },
         { id: 'threads', name: 'Threads', icon: '🧵' }
       ],
-      video: [
+      'Ролик': [
         { id: 'tiktok', name: 'TikTok', icon: '🎵' },
         { id: 'youtube-shorts', name: 'YouTube Shorts', icon: '📺' },
         { id: 'vk-clips', name: 'VK клипы', icon: '🎬' },
         { id: 'ok-video', name: 'ОК видео', icon: '🎥' },
         { id: 'dzen-video', name: 'Дзен видео', icon: '📹' }
       ],
-      carousel: [
+      'Карусель': [
         { id: 'tiktok', name: 'TikTok', icon: '🎵' },
         { id: 'vk-post', name: 'ВК пост', icon: '📸' },
         { id: 'ok-post', name: 'ОК пост', icon: '🖼️' }
@@ -465,10 +461,11 @@
 
     // Инициализация
     window.addEventListener('DOMContentLoaded', () => {
-      // Установка минимальной даты (текущее время)
+      // Установка минимальной даты (текущее время в GMT+3)
       const now = new Date();
-      now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-      document.getElementById('deadline').min = now.toISOString().slice(0, 16);
+      const moscowTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
+      moscowTime.setMinutes(moscowTime.getMinutes() - moscowTime.getTimezoneOffset() - 180);
+      document.getElementById('deadline').min = moscowTime.toISOString().slice(0, 16);
     });
 
     // Обработка чекбокса дедлайна
@@ -514,42 +511,24 @@
         btn.type = 'button';
         btn.className = 'platform-btn';
         btn.dataset.platformId = platform.id;
+        btn.dataset.platformName = platform.name;
         btn.innerHTML = `
           <span class="icon">${platform.icon}</span>
           <span>${platform.name}</span>
         `;
         
         btn.addEventListener('click', () => {
-          if (selectedPlatforms.has(platform.id)) {
-            selectedPlatforms.delete(platform.id);
+          if (selectedPlatforms.has(platform.name)) {
+            selectedPlatforms.delete(platform.name);
             btn.classList.remove('active');
           } else {
-            selectedPlatforms.add(platform.id);
+            selectedPlatforms.add(platform.name);
             btn.classList.add('active');
           }
         });
         
         platformButtons.appendChild(btn);
       });
-    }
-
-    // Получить название платформы по ID
-    function getPlatformName(platformId) {
-      for (const type in PLATFORMS) {
-        const platform = PLATFORMS[type].find(p => p.id === platformId);
-        if (platform) return platform.name;
-      }
-      return platformId;
-    }
-
-    // Получить название типа контента
-    function getContentTypeName(type) {
-      const names = {
-        post: 'Пост',
-        video: 'Ролик',
-        carousel: 'Карусель'
-      };
-      return names[type] || type;
     }
 
     // Отправка формы
@@ -590,11 +569,10 @@
       };
 
       // Формирование подтверждения
-      const contentTypeName = getContentTypeName(formData.contentType);
-      const platformNames = formData.platforms.map(id => getPlatformName(id)).join(', ');
+      const platformNames = formData.platforms.join(', ');
       const deadlineFormatted = formData.hasDeadline 
-        ? new Date(formData.deadline).toLocaleString('ru-RU')
-        : 'Не указан';
+        ? new Date(formData.deadline).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
+        : 'Не установлен';
       
       let confirmationHTML = `
         <div class="confirmation-item">
@@ -603,7 +581,7 @@
         </div>
         <div class="confirmation-item">
           <div class="confirmation-label">Тип контента</div>
-          <div class="confirmation-value">${contentTypeName}</div>
+          <div class="confirmation-value">${formData.contentType}</div>
         </div>
         <div class="confirmation-item">
           <div class="confirmation-label">Платформы (${formData.platforms.length} задач)</div>
@@ -637,11 +615,11 @@
       
       try {
         // Формирование задач
-        const tasks = formData.platforms.map(platformId => ({
+        const tasks = formData.platforms.map(platformName => ({
           materialLink: formData.materialLink,
-          contentType: getContentTypeName(formData.contentType),
-          platform: getPlatformName(platformId),
-          deadline: formData.hasDeadline ? formData.deadline : ''
+          contentType: formData.contentType,
+          platform: platformName,
+          deadline: formData.hasDeadline ? formData.deadline : null
         }));
 
         // Отправка в Google Sheets
