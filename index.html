@@ -461,11 +461,22 @@
 
     // Инициализация
     window.addEventListener('DOMContentLoaded', () => {
-      // Установка минимальной даты (текущее время в GMT+3)
+      // Установка минимальной даты (текущее время по Москве)
       const now = new Date();
-      const moscowTime = new Date(now.getTime() + (3 * 60 * 60 * 1000));
-      moscowTime.setMinutes(moscowTime.getMinutes() - moscowTime.getTimezoneOffset() - 180);
-      document.getElementById('deadline').min = moscowTime.toISOString().slice(0, 16);
+      // Преобразуем локальное время в московское
+      const moscowOffset = 3 * 60; // GMT+3 в минутах
+      const localOffset = now.getTimezoneOffset(); // смещение локального времени от UTC
+      const totalOffset = moscowOffset + localOffset;
+      const moscowTime = new Date(now.getTime() + totalOffset * 60 * 1000);
+      
+      // Форматируем для datetime-local input
+      const year = moscowTime.getFullYear();
+      const month = String(moscowTime.getMonth() + 1).padStart(2, '0');
+      const day = String(moscowTime.getDate()).padStart(2, '0');
+      const hours = String(moscowTime.getHours()).padStart(2, '0');
+      const minutes = String(moscowTime.getMinutes()).padStart(2, '0');
+      
+      document.getElementById('deadline').min = `${year}-${month}-${day}T${hours}:${minutes}`;
     });
 
     // Обработка чекбокса дедлайна
@@ -570,9 +581,24 @@
 
       // Формирование подтверждения
       const platformNames = formData.platforms.join(', ');
-      const deadlineFormatted = formData.hasDeadline 
-        ? new Date(formData.deadline).toLocaleString('ru-RU', { timeZone: 'Europe/Moscow' })
-        : 'Не установлен';
+      let deadlineFormatted = 'Не установлен';
+      
+      if (formData.hasDeadline && formData.deadline) {
+        // Преобразуем datetime-local в московское время для отображения
+        const deadlineDate = new Date(formData.deadline);
+        const moscowOffset = 3 * 60;
+        const localOffset = deadlineDate.getTimezoneOffset();
+        const totalOffset = moscowOffset + localOffset;
+        const moscowDeadline = new Date(deadlineDate.getTime() + totalOffset * 60 * 1000);
+        
+        const day = String(moscowDeadline.getDate()).padStart(2, '0');
+        const month = String(moscowDeadline.getMonth() + 1).padStart(2, '0');
+        const year = moscowDeadline.getFullYear();
+        const hours = String(moscowDeadline.getHours()).padStart(2, '0');
+        const minutes = String(moscowDeadline.getMinutes()).padStart(2, '0');
+        
+        deadlineFormatted = `${hours}:${minutes} ${day}.${month}.${year}`;
+      }
       
       let confirmationHTML = `
         <div class="confirmation-item">
